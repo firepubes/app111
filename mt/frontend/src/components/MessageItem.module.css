@@ -47,3 +47,107 @@
   line-height: 1.7;
   word-break: break-word;
 }
+
+.htmlPreview {
+  margin-top: var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.htmlPreview summary {
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.htmlFrame {
+  display: block;
+  width: 100%;
+  min-height: 320px;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.attachments {
+  margin-top: var(--space-5);
+}
+
+.attachmentHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.attachmentList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--space-3);
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.attachment:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--bg-hover);
+}
+
+.attachment:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.attachmentInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.attachmentInfo strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+}
+
+.attachmentInfo small {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .attachmentList {
+    grid-template-columns: 1fr;
+  }
+
+  .htmlFrame {
+    min-height: 240px;
+  }
+}
