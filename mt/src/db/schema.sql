@@ -1,6 +1,4 @@
--- MailTune D1 Schema
--- Run: wrangler d1 execute mailtune-db --file=src/db/schema.sql
-
+-- RatioMail D1 Schema
 CREATE TABLE IF NOT EXISTS inboxes (
   address TEXT PRIMARY KEY,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -33,3 +31,16 @@ CREATE TABLE IF NOT EXISTS session_inboxes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_session_inboxes_session ON session_inboxes(session_id);
+
+CREATE TABLE IF NOT EXISTS attachments (
+  id TEXT PRIMARY KEY,
+  message_id TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  size INTEGER NOT NULL DEFAULT 0,
+  object_key TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (message_id) REFERENCES messages(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_attachments_message ON attachments(message_id);
