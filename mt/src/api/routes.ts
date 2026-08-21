@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
-import { getInbox, createInbox, inboxExists, getSessionInboxes, getMessages, ensureSession, linkInboxToSession, unlinkInboxFromSession, isInboxInSession, getAttachment, getMessage, getAdminStats, getAdminInboxes, deleteInbox, deleteMessage } from '../db/queries';
+import { getInbox, createInbox, inboxExists, getSessionInboxes, getMessages, ensureSession, linkInboxToSession, unlinkInboxFromSession, isInboxInSession, getAttachment, getMessage, getAdminStats, getAdminInboxes, getAdminMessages, deleteInbox, deleteMessage } from '../db/queries';
 import { generateUniqueAddress } from '../utils/random-address';
 
 export interface ApiEnv { DB: D1Database; ATTACHMENTS: R2Bucket; APP_NAME: string; MAIL_DOMAIN: string; WEB_HOST: string; EXPIRY_DAYS?: string; ADMIN_KEY?: string; }
@@ -21,6 +21,7 @@ api.get('/inboxes/:address/messages', async (c) => { const sid = requireSession(
 api.get('/attachments/:attachmentId', async (c) => { const sid = requireSession(c); if (!sid) return c.json({ error: 'Missing session' }, 400); const attachment = await getAttachment(c.env.DB, c.req.param('attachmentId')); if (!attachment) return c.json({ error: 'Attachment not found' }, 404); const message = await getMessage(c.env.DB, attachment.message_id); if (!message || !(await isInboxInSession(c.env.DB, sid, message.inbox_address))) return c.json({ error: 'Forbidden' }, 403); const object = await c.env.ATTACHMENTS.get(attachment.object_key); if (!object) return c.json({ error: 'Attachment content not found' }, 404); const headers = new Headers(); object.writeHttpMetadata(headers); headers.set('Cache-Control', 'private, max-age=3600'); headers.set('X-Content-Type-Options', 'nosniff'); return new Response(object.body, { headers }); });
 api.get('/admin/stats', async (c) => { if (!requireAdmin(c)) return adminDenied(c); return c.json(await getAdminStats(c.env.DB)); });
 api.get('/admin/inboxes', async (c) => { if (!requireAdmin(c)) return adminDenied(c); return c.json(await getAdminInboxes(c.env.DB)); });
+api.get('/admin/inboxes/:address/messages', async (c) => { if (!requireAdmin(c)) return adminDenied(c); return c.json(await getAdminMessages(c.env.DB, decodeURIComponent(c.req.param('address')))); });
 api.delete('/admin/inboxes/:address', async (c) => { if (!requireAdmin(c)) return adminDenied(c); const attachments = await deleteInbox(c.env.DB, decodeURIComponent(c.req.param('address'))); await Promise.all(attachments.map((attachment) => c.env.ATTACHMENTS.delete(attachment.object_key))); return c.json({ ok: true, deletedAttachments: attachments.length }); });
 api.delete('/admin/messages/:messageId', async (c) => { if (!requireAdmin(c)) return adminDenied(c); const attachments = await deleteMessage(c.env.DB, c.req.param('messageId')); await Promise.all(attachments.map((attachment) => c.env.ATTACHMENTS.delete(attachment.object_key))); return c.json({ ok: true, deletedAttachments: attachments.length }); });
 export default api;
