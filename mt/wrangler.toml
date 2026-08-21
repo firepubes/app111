@@ -7,20 +7,20 @@ workers_dev = false
 [[d1_databases]]
 binding = "DB"
 database_name = "mailtune-db"
-database_id = "YOUR_DATABASE_ID_HERE"
+database_id = "b2f57054-d482-4a11-9d42-44e006da6c94"
 
 [[r2_buckets]]
 binding = "ATTACHMENTS"
 bucket_name = "ratiomail-attachments"
 
 [[routes]]
-pattern = "mail.example.com"
+pattern = "mail.ratiodevelopment.xyz"
 custom_domain = true
 
 [vars]
 APP_NAME = "Ratiomail"
-MAIL_DOMAIN = "example.com, another-domain.com"
-WEB_HOST = "mail.example.com"
+MAIL_DOMAIN = "temp.ratiodevelopment.xyz"
+WEB_HOST = "mail.ratiodevelopment.xyz"
 EXPIRY_DAYS = "1"
 
 [triggers]
