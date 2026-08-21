@@ -7,7 +7,7 @@ workers_dev = false
 [[d1_databases]]
 binding = "DB"
 database_name = "mailtune-db"
-database_id = "YOUR_DATABASE_ID_HERE"
+database_id = "b2f57054-d482-4a11-9d42-44e006da6c94"
 
 [[routes]]
 pattern = "mail.ratiodevelopment.xyz"
@@ -23,7 +23,7 @@ EXPIRY_DAYS = "1"
 crons = ["0 * * * *"]
 
 [assets]
-directory = "./src/web"
+directory = "./frontend/dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
