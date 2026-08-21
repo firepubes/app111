@@ -22,12 +22,9 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
     ...(options.headers as Record<string, string> | undefined),
   };
 
-  if (sessionId) {
-    headers['x-session-id'] = sessionId;
-  }
+  if (sessionId) headers['x-session-id'] = sessionId;
 
   const res = await fetch(url, { ...options, headers });
-
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || `Request failed: ${res.status}`);
@@ -72,4 +69,21 @@ export async function fetchMessages(address: string): Promise<Message[]> {
   return request<Message[]>(
     `/api/inboxes/${encodeURIComponent(address)}/messages`,
   );
+}
+
+export async function fetchAttachment(messageId: string, attachmentId: string): Promise<Blob> {
+  const headers: Record<string, string> = {};
+  if (sessionId) headers['x-session-id'] = sessionId;
+
+  const response = await fetch(
+    `/api/messages/${encodeURIComponent(messageId)}/attachments/${encodeURIComponent(attachmentId)}`,
+    { headers },
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Attachment download failed: ${response.status}`);
+  }
+
+  return response.blob();
 }
