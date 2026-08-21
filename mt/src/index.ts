@@ -1,16 +1,24 @@
 import api from './api/routes';
+import admin from './api/admin';
 import { handleEmail } from './email-handler';
 import type { EmailHandlerEnv } from './email-handler';
 import type { ApiEnv } from './api/routes';
+import type { AdminEnv } from './api/admin';
 
-export interface Env extends ApiEnv, EmailHandlerEnv {
+export interface Env extends ApiEnv, EmailHandlerEnv, AdminEnv {
   EXPIRY_DAYS?: string;
 }
 
 export default {
-
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/admin/')) {
+      const adminUrl = new URL(request.url);
+      adminUrl.pathname = url.pathname.slice('/api/admin'.length);
+      const adminRequest = new Request(adminUrl, request);
+      return admin.fetch(adminRequest, env, ctx);
+    }
 
     if (url.pathname.startsWith('/api/')) {
       const apiUrl = new URL(request.url);
