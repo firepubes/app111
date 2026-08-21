@@ -7,6 +7,7 @@ import type { AdminEnv } from './api/admin';
 
 export interface Env extends ApiEnv, EmailHandlerEnv, AdminEnv {
   EXPIRY_DAYS?: string;
+  ASSETS: Fetcher;
 }
 
 export default {
@@ -27,7 +28,9 @@ export default {
       return api.fetch(apiRequest, env, ctx);
     }
 
-    return new Response('Not found', { status: 404 });
+    // Everything else is a frontend route/static asset.
+    // Cloudflare's SPA asset fallback serves index.html for routes such as /admin.
+    return env.ASSETS.fetch(request);
   },
 
   async email(message: ForwardableEmailMessage, env: Env, _ctx: ExecutionContext): Promise<void> {
