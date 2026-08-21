@@ -1,41 +1,32 @@
-name = "mailtune"
+name = "ratiomail"
 main = "src/index.ts"
 compatibility_date = "2025-06-01"
-
-# Set workers_dev to false when using your own domain
 workers_dev = false
 
-# D1 Database
-# Step 1: run `npm run db:create`
-# Step 2: check terminal and paste
 [[d1_databases]]
 binding = "DB"
 database_name = "mailtune-db"
 database_id = "YOUR_DATABASE_ID_HERE"
 
-# Custom domain routes
-# CHANGE THIS to your own domain (e.g. mailtune.example.com)
+[[r2_buckets]]
+binding = "ATTACHMENTS"
+bucket_name = "ratiomail-attachments"
+
 [[routes]]
-pattern = "mail.example.com"
+pattern = "mail.ratiodevelopment.xyz"
 custom_domain = true
 
-# Environment variables
-# CHANGE THESE to your own domain
 [vars]
-APP_NAME = "MailTune"
-MAIL_DOMAIN = "example.com, another-domain.com"
-WEB_HOST = "mail.example.com"
-EXPIRY_DAYS = "1" # 0 = no expiry. 1 = 24 hours, 7 = 7 days, 30 = 30 days
+APP_NAME = "RatioMail"
+MAIL_DOMAIN = "temp.ratiodevelopment.xyz"
+WEB_HOST = "mail.ratiodevelopment.xyz"
+EXPIRY_DAYS = "1"
 
-# Cron Triggers for auto cleanup
-# "0 * * * *" runs every hour
 [triggers]
 crons = ["0 * * * *"]
 
-# Static assets (web frontend)
 [assets]
 directory = "./src/web"
 
-# Observability
 [observability]
 enabled = true
