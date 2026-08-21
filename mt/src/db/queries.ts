@@ -2,7 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 
 export interface Inbox { address: string; created_at: string; }
 export interface Attachment { id: string; message_id: string; filename: string; content_type: string; size: number; object_key: string; created_at: string; }
-export interface Message { id: string; inbox_address: string; from_address: string; subject: string; body: string; received_at: string; attachments?: Attachment[]; }
+export interface Message { id: string; inbox_address: string; from_address: string; subject: string; body: string; html_body?: string | null; received_at: string; attachments?: Attachment[]; }
 export interface Session { id: string; created_at: string; }
 
 export async function getInbox(db: D1Database, address: string): Promise<Inbox | null> { return db.prepare('SELECT * FROM inboxes WHERE address = ?').bind(address).first<Inbox>(); }
@@ -19,12 +19,9 @@ async function attachMessages(db: D1Database, messages: Omit<Message, 'attachmen
   return messages.map(message => ({ ...message, attachments: map.get(message.id) || [] }));
 }
 
-export async function getMessages(db: D1Database, inboxAddress: string): Promise<Message[]> {
-  const result = await db.prepare('SELECT * FROM messages WHERE inbox_address = ? ORDER BY received_at DESC').bind(inboxAddress).all<Omit<Message, 'attachments'>>();
-  return attachMessages(db, result.results);
-}
+export async function getMessages(db: D1Database, inboxAddress: string): Promise<Message[]> { const result = await db.prepare('SELECT * FROM messages WHERE inbox_address = ? ORDER BY received_at DESC').bind(inboxAddress).all<Omit<Message, 'attachments'>>(); return attachMessages(db, result.results); }
 export async function getMessage(db: D1Database, messageId: string): Promise<Message | null> { const message = await db.prepare('SELECT * FROM messages WHERE id = ?').bind(messageId).first<Omit<Message, 'attachments'>>(); return message ? (await attachMessages(db, [message]))[0] : null; }
-export async function insertMessage(db: D1Database, msg: Omit<Message, 'received_at' | 'attachments'>): Promise<void> { await db.prepare('INSERT INTO messages (id, inbox_address, from_address, subject, body) VALUES (?, ?, ?, ?, ?)').bind(msg.id, msg.inbox_address, msg.from_address, msg.subject, msg.body).run(); }
+export async function insertMessage(db: D1Database, msg: Omit<Message, 'received_at' | 'attachments'>): Promise<void> { await db.prepare('INSERT INTO messages (id, inbox_address, from_address, subject, body, html_body) VALUES (?, ?, ?, ?, ?, ?)').bind(msg.id, msg.inbox_address, msg.from_address, msg.subject, msg.body, msg.html_body || null).run(); }
 export async function insertAttachment(db: D1Database, attachment: Omit<Attachment, 'created_at'>): Promise<void> { await db.prepare('INSERT INTO attachments (id, message_id, filename, content_type, size, object_key) VALUES (?, ?, ?, ?, ?, ?)').bind(attachment.id, attachment.message_id, attachment.filename, attachment.content_type, attachment.size, attachment.object_key).run(); }
 export async function ensureSession(db: D1Database, sessionId: string): Promise<void> { await db.prepare('INSERT OR IGNORE INTO sessions (id) VALUES (?)').bind(sessionId).run(); }
 export async function sessionExists(db: D1Database, sessionId: string): Promise<boolean> { return !!(await db.prepare('SELECT 1 FROM sessions WHERE id = ? LIMIT 1').bind(sessionId).first()); }
@@ -33,10 +30,7 @@ export async function unlinkInboxFromSession(db: D1Database, sessionId: string, 
 export async function isInboxInSession(db: D1Database, sessionId: string, address: string): Promise<boolean> { return !!(await db.prepare('SELECT 1 FROM session_inboxes WHERE session_id = ? AND inbox_address = ? LIMIT 1').bind(sessionId, address).first()); }
 export async function getAttachment(db: D1Database, attachmentId: string): Promise<Attachment | null> { return db.prepare('SELECT * FROM attachments WHERE id = ?').bind(attachmentId).first<Attachment>(); }
 
-export async function getAdminStats(db: D1Database) {
-  const [inboxes, messages, attachments] = await Promise.all([db.prepare('SELECT COUNT(*) AS count FROM inboxes').first<{ count: number }>(), db.prepare('SELECT COUNT(*) AS count FROM messages').first<{ count: number }>(), db.prepare('SELECT COUNT(*) AS count FROM attachments').first<{ count: number }>()]);
-  return { inboxes: Number(inboxes?.count || 0), messages: Number(messages?.count || 0), attachments: Number(attachments?.count || 0) };
-}
+export async function getAdminStats(db: D1Database) { const [inboxes, messages, attachments, last24h] = await Promise.all([db.prepare('SELECT COUNT(*) AS count FROM inboxes').first<{ count: number }>(), db.prepare('SELECT COUNT(*) AS count FROM messages').first<{ count: number }>(), db.prepare('SELECT COUNT(*) AS count FROM attachments').first<{ count: number }>(), db.prepare("SELECT COUNT(*) AS count FROM messages WHERE datetime(received_at) >= datetime('now', '-1 day')").first<{ count: number }>()]); return { inboxes: Number(inboxes?.count || 0), messages: Number(messages?.count || 0), attachments: Number(attachments?.count || 0), messagesLast24h: Number(last24h?.count || 0) }; }
 export async function getAdminInboxes(db: D1Database) { return db.prepare(`SELECT i.address, i.created_at, (SELECT COUNT(*) FROM messages m WHERE m.inbox_address = i.address) AS message_count FROM inboxes i ORDER BY i.created_at DESC LIMIT 500`).all<Inbox & { message_count: number }>().then(r => r.results); }
 export async function getAdminMessages(db: D1Database, address: string): Promise<Message[]> { const result = await db.prepare('SELECT * FROM messages WHERE inbox_address = ? ORDER BY received_at DESC LIMIT 500').bind(address).all<Omit<Message, 'attachments'>>(); return attachMessages(db, result.results); }
 
