@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-5);
+  text-align: center;
+  animation: fadeIn 200ms ease-out;
+}
+
+.iconWrap {
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.iconWrap > svg {
+  width: 48px;
+  height: 48px;
+  stroke-width: 1.5;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.description {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+.action {
+  margin-top: var(--space-5);
+}

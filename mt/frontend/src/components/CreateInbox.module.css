@@ -1,0 +1,86 @@
+.box {
+  padding: var(--space-5);
+  background: var(--bg-secondary);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: slideDown 200ms ease-out;
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: var(--shadow);
+}
+
+.domainSelect {
+  padding: 12px 36px 12px 16px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  appearance: none;
+  min-width: 160px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231A1A2E' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 18px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.domainSelect:focus {
+  outline: none;
+  box-shadow: var(--shadow);
+}
+
+.buttonRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .domainSelect {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .buttonRow {
+    flex-direction: column;
+  }
+
+  .buttonRow > * {
+    width: 100%;
+  }
+}

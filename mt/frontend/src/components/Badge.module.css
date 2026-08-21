@@ -1,0 +1,45 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-badge);
+  white-space: nowrap;
+}
+
+.default {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.orange {
+  background: var(--accent-orange);
+  color: var(--text-on-accent);
+}
+
+.teal {
+  background: var(--accent-teal);
+  color: var(--text-on-accent);
+}
+
+.yellow {
+  background: var(--accent-yellow);
+  color: var(--text-on-accent);
+}
+
+.pink {
+  background: var(--accent-pink);
+  color: var(--text-on-accent);
+}
+
+.muted {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+}

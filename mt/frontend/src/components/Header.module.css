@@ -1,0 +1,60 @@
+.header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  padding-top: var(--space-4);
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.logoMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-orange);
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-on-accent);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.subtitle strong {
+  color: var(--accent-orange);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .header {
+    margin-bottom: var(--space-6);
+  }
+
+  .logoMark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logoMark > svg {
+    width: 22px;
+    height: 22px;
+  }
+}

@@ -1,0 +1,66 @@
+.toolbar {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--bg-card);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  animation: slideDown 200ms ease-out;
+}
+
+.selectWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.select {
+  width: 100%;
+  padding: 10px 40px 10px 14px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231A1A2E' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 18px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.select:focus {
+  outline: none;
+  box-shadow: var(--shadow);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .selectWrap {
+    width: 100%;
+  }
+
+  .actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .actions > * {
+    flex: 1 1 40%;
+  }
+}
