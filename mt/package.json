@@ -1,17 +1,8 @@
 {
-  "name": "mailtune",
-  "version": "1.0.0",
-  "description": "A modern, high-performance disposable email service built on Cloudflare Workers with a premium Neobrutalism UI.",
+  "name": "ratiomail",
+  "version": "1.1.0",
+  "description": "RatioMail disposable email service built on Cloudflare Workers.",
   "type": "module",
-  "author": "lrmn7",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lrmn7/mailtune"
-  },
-  "bugs": {
-    "url": "https://github.com/lrmn7/mailtune/issues"
-  },
-  "homepage": "https://github.com/lrmn7/mailtune#readme",
   "scripts": {
     "dev": "wrangler dev",
     "dev:frontend": "cd frontend && npm run dev",
@@ -19,7 +10,9 @@
     "deploy": "npm run build:frontend && wrangler deploy",
     "db:create": "wrangler d1 create mailtune-db",
     "db:migrate": "wrangler d1 execute mailtune-db --remote --file=src/db/schema.sql",
-    "db:local": "wrangler d1 execute mailtune-db --local --file=src/db/schema.sql"
+    "db:migrate:attachments": "wrangler d1 execute mailtune-db --remote --file=migrations/0002_attachments.sql",
+    "r2:create": "wrangler r2 bucket create ratiomail-attachments",
+    "admin:set-key": "wrangler secret put ADMIN_KEY"
   },
   "dependencies": {
     "hono": "^4.4.0",

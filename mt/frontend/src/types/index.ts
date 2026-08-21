@@ -11,6 +11,16 @@ export interface Inbox {
   created_at: string;
 }
 
+export interface Attachment {
+  id: string;
+  message_id: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  object_key: string;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
   inbox_address: string;
@@ -18,8 +28,7 @@ export interface Message {
   subject: string;
   body: string;
   received_at: string;
+  attachments?: Attachment[];
 }
 
-export interface Session {
-  sessionId: string;
-}
+export interface Session { sessionId: string; }
