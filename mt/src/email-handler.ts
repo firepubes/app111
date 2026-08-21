@@ -15,7 +15,7 @@ export interface EmailHandlerEnv {
 
 function toArrayBuffer(value: ArrayBuffer | Uint8Array): ArrayBuffer {
   if (value instanceof ArrayBuffer) return value;
-  return value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) as ArrayBuffer;
+  return new Uint8Array(value).buffer;
 }
 
 export async function handleEmail(message: ForwardableEmailMessage, env: EmailHandlerEnv): Promise<void> {
@@ -56,19 +56,21 @@ export async function handleEmail(message: ForwardableEmailMessage, env: EmailHa
       const attachmentId = `att_${crypto.randomUUID()}`;
       const objectKey = `messages/${msgId}/${attachmentId}`;
       const content = toArrayBuffer(attachment.content);
+      const filename = attachment.filename || 'attachment';
+      const contentType = attachment.mimeType || 'application/octet-stream';
 
       await env.ATTACHMENTS.put(objectKey, content, {
         httpMetadata: {
-          contentType: attachment.mimeType || 'application/octet-stream',
-          contentDisposition: `attachment; filename="${attachment.filename || 'attachment'}"`,
+          contentType,
+          contentDisposition: `attachment; filename="${filename.replace(/["\\\r\n]/g, '_')}"`,
         },
       });
 
       await insertAttachment(db, {
         id: attachmentId,
         message_id: msgId,
-        filename: attachment.filename || 'attachment',
-        content_type: attachment.mimeType || 'application/octet-stream',
+        filename,
+        content_type: contentType,
         size: content.byteLength,
         object_key: objectKey,
       });
