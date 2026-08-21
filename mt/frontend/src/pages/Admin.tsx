@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Activity, Database, FileText, Inbox, LockKeyhole, RefreshCw, ShieldAlert, Trash2 } from 'lucide-react';
 import styles from './Admin.module.css';
 
@@ -7,47 +7,13 @@ type AdminInbox = { address: string; created_at: string; message_count: number }
 
 export default function Admin() {
   const [key, setKey] = useState(() => sessionStorage.getItem('ratiomail-admin-key') || '');
-  const [input, setInput] = useState('');
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [inboxes, setInboxes] = useState<AdminInbox[]>([]);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(async (adminKey = key) => {
-    if (!adminKey) return;
-    setLoading(true); setError('');
-    try {
-      const headers = { 'x-admin-key': adminKey };
-      const [statsResponse, inboxResponse] = await Promise.all([
-        fetch('/api/admin/stats', { headers }),
-        fetch('/api/admin/inboxes', { headers }),
-      ]);
-      if (!statsResponse.ok || !inboxResponse.ok) throw new Error('Invalid admin key or admin API unavailable.');
-      setStats(await statsResponse.json());
-      setInboxes(await inboxResponse.json());
-      sessionStorage.setItem('ratiomail-admin-key', adminKey);
-      setKey(adminKey);
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to load admin dashboard.'); }
-    finally { setLoading(false); }
-  }, [key]);
-
-  useEffect(() => { if (key) void load(key); }, []);
-
-  const login = async (event: React.FormEvent) => { event.preventDefault(); await load(input.trim()); };
-  const deleteInbox = async (address: string) => {
-    if (!window.confirm(`Permanently delete ${address} and all of its messages?`)) return;
-    const response = await fetch(`/api/admin/inboxes/${encodeURIComponent(address)}`, { method: 'DELETE', headers: { 'x-admin-key': key } });
-    if (!response.ok) { setError('Failed to delete inbox.'); return; }
-    await load(key);
-  };
+  const [input, setInput] = useState(''); const [stats, setStats] = useState<Stats | null>(null); const [inboxes, setInboxes] = useState<AdminInbox[]>([]); const [error, setError] = useState(''); const [loading, setLoading] = useState(false);
+  const load = useCallback(async (adminKey: string) => { if (!adminKey) return; setLoading(true); setError(''); try { const headers = { 'x-admin-key': adminKey }; const [statsResponse, inboxResponse] = await Promise.all([fetch('/api/admin/stats', { headers }), fetch('/api/admin/inboxes', { headers })]); if (!statsResponse.ok || !inboxResponse.ok) throw new Error('Invalid admin key or admin API unavailable.'); setStats(await statsResponse.json() as Stats); setInboxes(await inboxResponse.json() as AdminInbox[]); sessionStorage.setItem('ratiomail-admin-key', adminKey); setKey(adminKey); } catch (err) { setError(err instanceof Error ? err.message : 'Unable to load admin dashboard.'); } finally { setLoading(false); } }, []);
+  useEffect(() => { const saved = sessionStorage.getItem('ratiomail-admin-key'); if (saved) void load(saved); }, [load]);
+  const login = async (event: FormEvent) => { event.preventDefault(); await load(input.trim()); };
+  const deleteInbox = async (address: string) => { if (!window.confirm(`Permanently delete ${address} and all of its messages?`)) return; const response = await fetch(`/api/admin/inboxes/${encodeURIComponent(address)}`, { method: 'DELETE', headers: { 'x-admin-key': key } }); if (!response.ok) { setError('Failed to delete inbox.'); return; } await load(key); };
   const logout = () => { sessionStorage.removeItem('ratiomail-admin-key'); setKey(''); setStats(null); setInboxes([]); };
-
-  if (!key || !stats) return <div className={styles.page}><div className={styles.loginCard}><div className={styles.logo}><LockKeyhole size={22} /></div><span className={styles.eyebrow}>RATIOMAIL CONTROL</span><h1>Administrator access</h1><p>Enter the private admin key configured on the Worker.</p><form onSubmit={login}><input type="password" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Admin key" autoFocus /><button type="submit" disabled={!input || loading}>{loading ? 'Checking…' : 'Sign in'}</button></form>{error && <div className={styles.error}><ShieldAlert size={17} />{error}</div>}</div></div>;
-
-  return <div className={styles.page}>
-    <header className={styles.header}><div><span className={styles.eyebrow}>RATIOMAIL CONTROL</span><h1>Administration</h1><p>Monitor temporary mail infrastructure and remove abusive or unwanted inboxes.</p></div><div className={styles.headerActions}><button onClick={() => void load(key)} disabled={loading}><RefreshCw size={16} /> Refresh</button><button onClick={logout}>Sign out</button></div></header>
-    <section className={styles.stats}>{[['Inboxes', stats.inboxes, Inbox], ['Messages', stats.messages, FileText], ['Attachments', stats.attachments, Database]].map(([label, value, Icon]) => <article key={String(label)}><div><Icon size={19} /></div><span>{label as string}</span><strong>{value as number}</strong></article>)}</section>
-    <section className={styles.panel}><div className={styles.panelHeader}><div><span className={styles.eyebrow}>LIVE DATA</span><h2>Temporary inboxes</h2></div><div className={styles.live}><Activity size={15} /> Admin API connected</div></div><div className={styles.table}>{inboxes.length === 0 ? <div className={styles.empty}>No inboxes currently exist.</div> : inboxes.map((inbox) => <div className={styles.row} key={inbox.address}><div className={styles.address}><Inbox size={17} /><div><strong>{inbox.address}</strong><span>Created {new Date(inbox.created_at).toLocaleString()}</span></div></div><span className={styles.count}>{inbox.message_count} message{inbox.message_count === 1 ? '' : 's'}</span><button className={styles.delete} onClick={() => void deleteInbox(inbox.address)} title="Delete inbox"><Trash2 size={16} /></button></div>)}</div></section>
-    <div className={styles.warning}><ShieldAlert size={18} /><span>Admin actions are permanent. The admin key must only be stored as a Cloudflare Worker secret, never in source control.</span></div>
-  </div>;
+  if (!key || !stats) return <div className={styles.page}><div className={styles.loginCard}><div className={styles.logo}><LockKeyhole size={22}/></div><span className={styles.eyebrow}>RATIOMAIL CONTROL</span><h1>Administrator access</h1><p>Enter the private admin key configured on the Worker.</p><form onSubmit={login}><input type="password" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Admin key" autoFocus/><button type="submit" disabled={!input || loading}>{loading ? 'Checking…' : 'Sign in'}</button></form>{error && <div className={styles.error}><ShieldAlert size={17}/>{error}</div>}</div></div>;
+  const cards = [{ label: 'Inboxes', value: stats.inboxes, Icon: Inbox }, { label: 'Messages', value: stats.messages, Icon: FileText }, { label: 'Attachments', value: stats.attachments, Icon: Database }];
+  return <div className={styles.page}><header className={styles.header}><div><span className={styles.eyebrow}>RATIOMAIL CONTROL</span><h1>Administration</h1><p>Monitor temporary mail infrastructure and remove abusive or unwanted inboxes.</p></div><div className={styles.headerActions}><button onClick={() => void load(key)} disabled={loading}><RefreshCw size={16}/> Refresh</button><button onClick={logout}>Sign out</button></div></header><section className={styles.stats}>{cards.map(({ label, value, Icon }) => <article key={label}><div><Icon size={19}/></div><span>{label}</span><strong>{value}</strong></article>)}</section><section className={styles.panel}><div className={styles.panelHeader}><div><span className={styles.eyebrow}>LIVE DATA</span><h2>Temporary inboxes</h2></div><div className={styles.live}><Activity size={15}/> Admin API connected</div></div><div className={styles.table}>{inboxes.length === 0 ? <div className={styles.empty}>No inboxes currently exist.</div> : inboxes.map((inbox) => <div className={styles.row} key={inbox.address}><div className={styles.address}><Inbox size={17}/><div><strong>{inbox.address}</strong><span>Created {new Date(inbox.created_at).toLocaleString()}</span></div></div><span className={styles.count}>{inbox.message_count} message{inbox.message_count === 1 ? '' : 's'}</span><button className={styles.delete} onClick={() => void deleteInbox(inbox.address)} title="Delete inbox"><Trash2 size={16}/></button></div>)}</div></section><div className={styles.warning}><ShieldAlert size={18}/><span>Admin actions are permanent. Store the admin key only as a Cloudflare Worker secret.</span></div></div>;
 }
